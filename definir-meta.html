@@ -65,7 +65,61 @@
     }
     .danger-card h3 { color:var(--danger); }
     .danger-card p  { max-width:420px; }
-  </style>
+
+    /* reminder row */
+    .reminder-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .75rem 1rem;
+      background: var(--gray-50);
+      border: 1.5px solid var(--gray-100);
+      border-radius: var(--r-md);
+      flex-wrap: wrap;
+    }
+    .reminder-row.enabled { border-color: var(--mint-dark); background: var(--card-bg); }
+    .reminder-row .rr-toggle {
+      width: 40px; height: 22px;
+      background: var(--gray-200);
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background var(--ease);
+      flex-shrink: 0;
+      border: none;
+    }
+    .reminder-row .rr-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+      transition: transform var(--ease);
+    }
+    .reminder-row.enabled .rr-toggle { background: var(--purple); }
+    .reminder-row.enabled .rr-toggle::after { transform: translateX(18px); }
+    .reminder-row .rr-info { flex: 1; min-width: 0; }
+    .reminder-row .rr-title { font-size: .88rem; font-weight: 800; color: var(--gray-900); }
+    .reminder-row .rr-body  { font-size: .78rem; color: var(--gray-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .reminder-row .rr-time  {
+      display: flex; align-items: center; gap: .25rem;
+    }
+    .rr-time input[type="time"] {
+      padding: .3rem .6rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--r-sm);
+      font-family: var(--font, 'Nunito', sans-serif);
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      background: var(--white);
+      outline: none;
+      cursor: pointer;
+    }
+    .rr-time input[type="time"]:focus { border-color: var(--purple); }
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -191,6 +245,52 @@
         </div>
       </div>
 
+      <!-- Notifications -->
+      <div class="goal-section-card" id="notifCard">
+        <div class="goal-section-header">
+          <div class="gs-icon" style="background:#fff3e0;color:#f57c00;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div style="flex:1;">
+            <h3>Notificações e Lembretes</h3>
+            <p style="font-size:.82rem;margin:0;">Receba alertas no navegador para não esquecer seus hábitos</p>
+          </div>
+          <span id="notifBadge" class="chip" style="flex-shrink:0;"></span>
+        </div>
+        <div class="goal-section-body">
+
+          <!-- permission banner -->
+          <div id="notifPermBanner" style="display:none;background:var(--purple-light);border:1.5px solid var(--purple);border-radius:var(--r-md);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:.9rem;font-weight:800;color:var(--purple-dark);">Ative as notificações do navegador</div>
+              <div style="font-size:.82rem;color:var(--purple);margin-top:.2rem;">Clique em "Ativar" e permita quando o navegador perguntar.</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="enableNotifBtn">Ativar notificações</button>
+          </div>
+
+          <!-- blocked banner -->
+          <div id="notifBlockedBanner" style="display:none;background:#fdecea;border:1.5px solid var(--danger);border-radius:var(--r-md);padding:1rem 1.25rem;">
+            <div style="font-size:.9rem;font-weight:800;color:var(--danger);">Notificações bloqueadas</div>
+            <div style="font-size:.82rem;color:#b71c1c;margin-top:.2rem;">Clique no cadeado na barra de endereço do navegador → Notificações → Permitir.</div>
+          </div>
+
+          <!-- unsupported banner -->
+          <div id="notifUnsupportedBanner" style="display:none;background:var(--gray-100);border-radius:var(--r-md);padding:1rem 1.25rem;">
+            <div style="font-size:.88rem;color:var(--gray-600);font-weight:700;">Seu navegador não suporta notificações. Tente Chrome ou Edge.</div>
+          </div>
+
+          <!-- reminder list -->
+          <div id="reminderList" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+
+          <!-- actions -->
+          <div id="notifActions" style="display:none;flex-wrap:wrap;gap:.6rem;">
+            <button class="btn btn-primary" id="saveNotifBtn">Salvar lembretes</button>
+            <button class="btn btn-ghost btn-sm" id="testNotifBtn">Enviar teste</button>
+            <button class="btn btn-ghost btn-sm" id="disableAllBtn">Desativar todos</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Save -->
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;">
         <button class="btn btn-primary btn-lg" id="saveBtn">Salvar metas</button>
@@ -230,6 +330,7 @@
 <div class="mobile-overlay" id="mobileOverlay"></div>
 <div id="toast-container"></div>
 <script src="js/app.js"></script>
+<script src="js/notifications.js"></script>
 <script>
   VF.requireAuth();
   VF.initSidebar('definir-meta.html');
@@ -282,6 +383,105 @@
     Object.keys(localStorage).filter(k => k.startsWith('vf_')).forEach(k => localStorage.removeItem(k));
     window.location.href = 'index.html';
   });
+
+  /* ══ NOTIFICATIONS ══ */
+  let reminders = VFNotif.load();
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+
+  function renderReminders() {
+    const perm    = VFNotif.permission();
+    const granted = perm === 'granted';
+    const blocked = perm === 'denied';
+    const unsupp  = perm === 'unsupported';
+
+    document.getElementById('notifPermBanner').style.display    = (!unsupp && !granted && !blocked) ? 'flex' : 'none';
+    document.getElementById('notifBlockedBanner').style.display = blocked  ? 'block' : 'none';
+    document.getElementById('notifUnsupportedBanner').style.display = unsupp ? 'block' : 'none';
+    document.getElementById('notifActions').style.display       = granted  ? 'flex'  : 'none';
+    document.getElementById('reminderList').style.display       = (!unsupp && !blocked) ? 'flex' : 'none';
+
+    /* badge */
+    const badge = document.getElementById('notifBadge');
+    if (unsupp || blocked) {
+      badge.className = 'chip chip-red';
+      badge.textContent = unsupp ? 'Não suportado' : 'Bloqueado';
+    } else if (granted) {
+      const n = reminders.filter(r => r.enabled).length;
+      badge.className = 'chip chip-green';
+      badge.textContent = n + ' ativo' + (n !== 1 ? 's' : '');
+    } else {
+      badge.className = 'chip chip-orange';
+      badge.textContent = 'Desativado';
+    }
+
+    const list = document.getElementById('reminderList');
+    list.innerHTML = reminders.map((r, i) => `
+      <div class="reminder-row ${r.enabled ? 'enabled' : ''}" id="rr-${i}">
+        <button class="rr-toggle" data-i="${i}" aria-label="Ativar/desativar" ${!granted ? 'disabled style="opacity:.4;cursor:not-allowed;"' : ''}></button>
+        <div class="rr-info">
+          <div class="rr-title">${r.title}</div>
+          <div class="rr-body">${r.body}</div>
+        </div>
+        <div class="rr-time">
+          <input type="time" value="${pad(r.hour)}:${pad(r.minute)}" data-i="${i}" ${!granted ? 'disabled' : ''}/>
+        </div>
+      </div>
+    `).join('');
+
+    /* toggle clicks */
+    list.querySelectorAll('.rr-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = +btn.dataset.i;
+        reminders[i].enabled = !reminders[i].enabled;
+        renderReminders();
+      });
+    });
+
+    /* time changes */
+    list.querySelectorAll('input[type="time"]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const i = +inp.dataset.i;
+        const [h, m] = inp.value.split(':').map(Number);
+        reminders[i].hour   = h;
+        reminders[i].minute = m;
+      });
+    });
+  }
+
+  document.getElementById('enableNotifBtn')?.addEventListener('click', async () => {
+    const result = await VFNotif.requestPermission();
+    if (result === 'granted') {
+      VF.toast('Notificações ativadas!', 'success');
+    } else if (result === 'denied') {
+      VF.toast('Permissão negada. Libere nas configurações do navegador.', 'error');
+    }
+    renderReminders();
+  });
+
+  document.getElementById('saveNotifBtn')?.addEventListener('click', async () => {
+    VFNotif.save(reminders);
+    await VFNotif.syncToSW(reminders);
+    const n = reminders.filter(r => r.enabled).length;
+    VF.toast(`${n} lembrete${n !== 1 ? 's' : ''} salvo${n !== 1 ? 's' : ''}!`, 'success');
+    renderReminders();
+  });
+
+  document.getElementById('testNotifBtn')?.addEventListener('click', async () => {
+    await VFNotif.sendTest();
+    VF.toast('Notificação de teste enviada!');
+  });
+
+  document.getElementById('disableAllBtn')?.addEventListener('click', () => {
+    reminders.forEach(r => r.enabled = false);
+    VFNotif.save(reminders);
+    VFNotif.clearSW();
+    VF.toast('Todos os lembretes desativados.');
+    renderReminders();
+  });
+
+  renderReminders();
+
 </script>
 </body>
 </html>

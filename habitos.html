@@ -134,6 +134,12 @@
         </div>
       </div>
 
+      <!-- Personalized Recommendations -->
+      <div style="margin-bottom:1.75rem;">
+        <div class="section-label" style="margin-bottom:.75rem;">Recomendações para você</div>
+        <div id="recsList" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+      </div>
+
       <!-- Achievements -->
       <div class="card">
         <div class="section-label" style="margin-bottom:.75rem;">Conquistas</div>
@@ -162,7 +168,7 @@
       const log = VF.getLog(key);
       const w   = log.filter(e => e.type === 'water').reduce((s,e) => s + e.amount, 0);
       const ex  = log.filter(e => e.type === 'exercise').reduce((s,e) => s + e.amount, 0);
-      result.push({ w, ex, label: d.getDate() });
+      result.push({ w, ex, label: d.getDate(), dayName: d.toLocaleDateString('pt-BR', { weekday: 'short' }) });
     }
     return result;
   }
@@ -200,7 +206,144 @@
     return `<div class="streak-day ${cls}" title="${d.label}">${d.label}</div>`;
   }).join('');
 
-  /* insights */
+  /* ── Recomendações personalizadas ── */
+  function buildRecs() {
+    const recs = [];
+    const avgW7  = daysW7 > 0 ? Math.round(totalW7 / 7) : 0;
+    const avgE7  = daysE7 > 0 ? Math.round(totalE7 / 7) : 0;
+    const name   = (VF.getSession()?.name || '').split(' ')[0];
+
+    /* 1. Qual o melhor e pior dia da semana (água) */
+    const DAYS_LABELS = ['dom','seg','ter','qua','qui','sex','sáb'];
+    const dayBuckets = {};
+    hist28.forEach(d => {
+      if (!d.dayName) return;
+      if (!dayBuckets[d.dayName]) dayBuckets[d.dayName] = { w: 0, ex: 0, count: 0 };
+      dayBuckets[d.dayName].w  += d.w;
+      dayBuckets[d.dayName].ex += d.ex;
+      dayBuckets[d.dayName].count++;
+    });
+    const dayEntries = Object.entries(dayBuckets).filter(([,v]) => v.count > 0);
+    if (dayEntries.length >= 3) {
+      const bestW  = dayEntries.reduce((a,b) => b[1].w/b[1].count  > a[1].w/a[1].count  ? b : a);
+      const worstW = dayEntries.reduce((a,b) => b[1].w/b[1].count  < a[1].w/a[1].count  ? b : a);
+      if (bestW[0] !== worstW[0]) {
+        recs.push({ e:'📅', priority: 2,
+          t:`Seu melhor dia é ${bestW[0]}`,
+          d:`Você se hidrata mais nas ${bestW[0]}s. Tente replicar esse ritmo nos outros dias da semana.`
+        });
+        recs.push({ e:'⚠️', priority: 3,
+          t:`Atenção às ${worstW[0]}s`,
+          d:`Nas ${worstW[0]}s seu consumo de água é menor. Que tal programar um lembrete nesse dia?`
+        });
+      }
+    }
+
+    /* 2. Meta de água bem calibrada ou não? */
+    if (avgW7 > 0) {
+      const wPct28 = hist28.filter(d => d.w >= goals.water).length;
+      if (wPct28 >= 22) {
+        const sugestao = Math.round((goals.water * 1.1) / 100) * 100;
+        recs.push({ e:'⬆️', priority: 1,
+          t:'Você supera a meta com facilidade',
+          d:`Atingiu a meta de água em ${wPct28}/28 dias. Considere aumentar para ${sugestao} ml para continuar evoluindo.`
+        });
+      } else if (wPct28 <= 5) {
+        const sugestao = Math.max(1000, Math.round((goals.water * 0.8) / 100) * 100);
+        recs.push({ e:'🎯', priority: 1,
+          t:'Meta de água muito ambiciosa?',
+          d:`Atingiu em apenas ${wPct28}/28 dias. Tente começar com ${sugestao} ml e aumentar gradualmente.`
+        });
+      }
+    }
+
+    /* 3. Meta de exercício calibrada? */
+    if (totalE7 > 0) {
+      const ePct28 = hist28.filter(d => d.ex >= goals.exercise).length;
+      if (ePct28 >= 22) {
+        const sugestao = Math.round((goals.exercise * 1.2) / 5) * 5;
+        recs.push({ e:'💪', priority: 1,
+          t:'Hora de aumentar o desafio de treino',
+          d:`Bateu a meta de exercício em ${ePct28}/28 dias. Experimente aumentar para ${sugestao} min por dia.`
+        });
+      } else if (ePct28 <= 4 && totalE7 > 0) {
+        recs.push({ e:'🗓️', priority: 2,
+          t:'Planeje seus treinos com antecedência',
+          d:'Treinos programados têm mais chance de acontecer. Escolha 3 dias fixos na semana e anote no calendário.'
+        });
+      }
+    }
+
+    /* 4. Consistência geral */
+    if (streak === 0 && hist28.some(d => d.w > 0 || d.ex > 0)) {
+      recs.push({ e:'🔄', priority: 2,
+        t:'Recomece hoje mesmo',
+        d:`${name}, você já tinha criado o hábito antes. Registrar qualquer coisa hoje já reconstrói sua sequência.`
+      });
+    } else if (streak >= 1 && streak < 3) {
+      recs.push({ e:'🔥', priority: 1,
+        t:`Sequência de ${streak} dia${streak > 1 ? 's' : ''} — mantenha!`,
+        d:'Chegar a 3 dias seguidos é o primeiro marco importante para criar um hábito duradouro.'
+      });
+    } else if (streak >= 7) {
+      recs.push({ e:'🌟', priority: 0,
+        t:'Sequência incrível!',
+        d:`${streak} dias sem parar. Pesquisas mostram que após 21 dias o hábito se torna automático — você está no caminho!`
+      });
+    }
+
+    /* 5. Hidratação vs treino desbalanceados */
+    if (daysW7 >= 5 && daysE7 <= 1) {
+      recs.push({ e:'⚖️', priority: 2,
+        t:'Ótima hidratação — agora falta o treino',
+        d:'Você bebe água consistentemente. Que tal aproveitar esse mesmo disciplina para encaixar 15 min de atividade física?'
+      });
+    } else if (daysE7 >= 5 && daysW7 <= 1) {
+      recs.push({ e:'💧', priority: 2,
+        t:'Ativo, mas pouco hidratado',
+        d:'Você treina bem! Lembre que o exercício aumenta a necessidade de água — tente beber 500 ml extra nos dias de treino.'
+      });
+    }
+
+    /* 6. Próxima conquista a desbloquear */
+    const nextAch = (() => {
+      if (streak < 3)  return { e:'⭐', n:'3 dias seguidos', faltam: 3 - streak, unidade: 'dia' };
+      if (streak < 7)  return { e:'🔥', n:'7 dias seguidos', faltam: 7 - streak, unidade: 'dia' };
+      if (!hist28.some(d => d.w >= 2000))           return { e:'🌊', n:'Mar de água', faltam: null, dica:'Registre 2 litros em um único dia' };
+      if (!hist28.some(d => d.ex >= 60))            return { e:'🏆', n:'Maratonista', faltam: null, dica:'Registre 60 min de treino em um dia' };
+      return null;
+    })();
+    if (nextAch) {
+      recs.push({ e: nextAch.e, priority: 1,
+        t: `Próxima conquista: "${nextAch.n}"`,
+        d: nextAch.faltam != null
+          ? `Faltam apenas ${nextAch.faltam} ${nextAch.unidade}${nextAch.faltam > 1 ? 's' : ''} para desbloquear!`
+          : nextAch.dica + ' para desbloquear esta conquista.'
+      });
+    }
+
+    /* 7. Nenhum dado ainda */
+    if (hist28.every(d => d.w === 0 && d.ex === 0)) {
+      recs.length = 0;
+      recs.push({ e:'👋', priority: 0,
+        t:`Olá, ${name}! Vamos começar?`,
+        d:'Ainda não há dados suficientes para gerar recomendações. Registre água e treinos por alguns dias e volte aqui!'
+      });
+    }
+
+    /* ordena por prioridade e limita a 5 */
+    recs.sort((a,b) => a.priority - b.priority);
+    return recs.slice(0, 5);
+  }
+
+  const recs = buildRecs();
+  document.getElementById('recsList').innerHTML = recs.map(r => `
+    <div class="insight-card" style="background:#fff;border-color:var(--gray-200);">
+      <span class="ic-emoji">${r.e}</span>
+      <div class="ic-text"><h4>${r.t}</h4><p>${r.d}</p></div>
+    </div>`).join('') || '<p style="color:var(--gray-400);padding:.5rem 0;">Nenhuma recomendação disponível ainda.</p>';
+
+  /* achievements */
   const insights = [];
   if (daysW7 === 7)  insights.push({ e:'🏆', t:'Perfeito na hidratação!', d:'Você atingiu a meta de água todos os 7 dias da semana.' });
   else if (daysW7 >= 5) insights.push({ e:'💧', t:'Quase lá na hidratação', d:`Meta de água atingida em ${daysW7}/7 dias. Continue assim!` });
