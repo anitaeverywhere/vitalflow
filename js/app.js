@@ -2,66 +2,105 @@
    VitalFlow — shared app logic
 ════════════════════════════════════════ */
 
-/* ── Auth ── */
 const VF = {
-  /* Session */
-  getSession() { return JSON.parse(localStorage.getItem('vf_session') || 'null'); },
+  /* ── Storage helpers (protegido contra localStorage bloqueado) ── */
+  _get(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return fallback;
+      const parsed = JSON.parse(raw);
+      return parsed ?? fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  _set(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (e) {
+      VF.toast('Não foi possível salvar os dados. Verifique as configurações do navegador.', 'error');
+      return false;
+    }
+  },
+  _remove(key) {
+    try { localStorage.removeItem(key); } catch {}
+  },
+
+  /* ── Session ── */
+  getSession() { return this._get('vf_session', null); },
   requireAuth() {
-    if (!this.getSession()) { window.location.href = 'index.html'; }
+    if (!this.getSession()) window.location.href = 'index.html';
   },
   logout() {
-    localStorage.removeItem('vf_session');
+    this._remove('vf_session');
     window.location.href = 'index.html';
   },
 
-  /* Goals */
+  /* ── Goals ── */
   getGoals() {
-    return JSON.parse(localStorage.getItem('vf_goals') || '{"water":2000,"exercise":30}');
+    const g = this._get('vf_goals', { water: 2000, exercise: 30 });
+    /* garante que os valores são números válidos */
+    return {
+      water:    Number.isFinite(g.water)    && g.water    > 0 ? g.water    : 2000,
+      exercise: Number.isFinite(g.exercise) && g.exercise > 0 ? g.exercise : 30,
+    };
   },
-  saveGoals(g) { localStorage.setItem('vf_goals', JSON.stringify(g)); },
+  saveGoals(g) { this._set('vf_goals', g); },
 
-  /* Daily log */
+  /* ── Daily log ── */
   todayKey() {
     const d = new Date();
     return `vf_log_${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   },
-  getLog(key) { return JSON.parse(localStorage.getItem(key || this.todayKey()) || '[]'); },
-  saveLog(log, key) { localStorage.setItem(key || this.todayKey(), JSON.stringify(log)); },
+  getLog(key) {
+    const raw = this._get(key || this.todayKey(), []);
+    /* descarta entradas malformadas */
+    return Array.isArray(raw)
+      ? raw.filter(e => e && typeof e.type === 'string' && Number.isFinite(e.amount) && e.amount > 0)
+      : [];
+  },
+  saveLog(log, key) { this._set(key || this.todayKey(), log); },
   addEntry(type, amount) {
+    const amt = Number(amount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      VF.toast('Valor inválido.', 'error');
+      return null;
+    }
     const log = this.getLog();
-    log.push({ type, amount, ts: Date.now() });
+    log.push({ type, amount: amt, ts: Date.now() });
     this.saveLog(log);
     return log;
   },
 
-  /* Totals */
+  /* ── Totals ── */
   dayTotal(type, key) {
-    return this.getLog(key).filter(e => e.type === type).reduce((s, e) => s + e.amount, 0);
+    return this.getLog(key)
+      .filter(e => e.type === type)
+      .reduce((s, e) => s + e.amount, 0);
   },
   pct(type) {
     const goals = this.getGoals();
+    const goal  = type === 'water' ? goals.water : goals.exercise;
     const total = this.dayTotal(type);
-    return Math.min(100, Math.round(total / (type === 'water' ? goals.water : goals.exercise) * 100));
+    if (!goal) return 0;
+    return Math.min(100, Math.round(total / goal * 100));
   },
 
-  /* Weekly log (last 7 days) */
+  /* ── Weekly log (last 7 days) ── */
   weekData() {
     const days = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const key = `vf_log_${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const key   = `vf_log_${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       const label = d.toLocaleDateString('pt-BR', { weekday: 'short' });
-      days.push({
-        label,
-        water:    this.dayTotal('water', key),
-        exercise: this.dayTotal('exercise', key),
-      });
+      days.push({ label, water: this.dayTotal('water', key), exercise: this.dayTotal('exercise', key) });
     }
     return days;
   },
 
-  /* Toast */
+  /* ── Toast ── */
   toast(msg, type = '') {
     let tc = document.getElementById('toast-container');
     if (!tc) {
@@ -74,13 +113,10 @@ const VF = {
     t.textContent = msg;
     tc.appendChild(t);
     requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => {
-      t.classList.remove('show');
-      setTimeout(() => t.remove(), 300);
-    }, 2800);
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2800);
   },
 
-  /* Sidebar active state */
+  /* ── Sidebar: init, toggle, mobile overlay ── */
   initSidebar(activeHref) {
     const session = this.getSession();
     if (!session) return;
@@ -102,15 +138,58 @@ const VF = {
     document.querySelectorAll('.btn-logout, #logoutBtn').forEach(btn => {
       btn.addEventListener('click', () => VF.logout());
     });
+
+    /* ── collapse toggle (desktop) ── */
+    const shell   = document.querySelector('.app-shell');
+    const sidebar = document.querySelector('.sidebar');
+    const COLLAPSED_KEY = 'vf_sidebar_collapsed';
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+
+    function applyCollapsed(collapsed) {
+      shell?.classList.toggle('sidebar-collapsed', collapsed);
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', !collapsed);
+    }
+
+    /* restore saved state */
+    applyCollapsed(this._get(COLLAPSED_KEY, false));
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const willCollapse = !shell?.classList.contains('sidebar-collapsed');
+        applyCollapsed(willCollapse);
+        this._set(COLLAPSED_KEY, willCollapse);
+      });
+    }
+
+    /* ── mobile drawer overlay ── */
+    const mobileToggle  = document.getElementById('mobileMenuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function openMobileMenu()  {
+      sidebar?.classList.add('mobile-open');
+      mobileOverlay?.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      sidebar?.classList.remove('mobile-open');
+      mobileOverlay?.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    mobileToggle?.addEventListener('click', openMobileMenu);
+    mobileOverlay?.addEventListener('click', closeMobileMenu);
+
+    /* close mobile menu on nav link click */
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.addEventListener('click', closeMobileMenu);
+    });
   },
 
-  /* Greeting */
+  /* ── Helpers ── */
   greeting() {
     const h = new Date().getHours();
     return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   },
-
-  /* Format date */
   dateLabel() {
     return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   },
