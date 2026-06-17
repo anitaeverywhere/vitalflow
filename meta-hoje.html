@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VitalFlow — Meta de Hoje</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .goal-hero-row { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.75rem; }
+    .goal-hero-card {
+      border-radius:var(--r-xl);
+      padding:1.75rem;
+      display:flex; flex-direction:column; gap:1rem;
+    }
+    .goal-hero-card.water    { background:linear-gradient(135deg,#e1f5fe,#b3e5fc); border:1.5px solid #b3e5fc; }
+    .goal-hero-card.exercise { background:linear-gradient(135deg,var(--purple-light),#d1c4e9); border:1.5px solid #d1c4e9; }
+    .goal-hero-card h3 { font-size:1rem; font-weight:800; }
+    .goal-hero-card.water    h3 { color:#01579b; }
+    .goal-hero-card.exercise h3 { color:var(--purple-dark); }
+    .goal-big { font-size:2.8rem; font-weight:900; line-height:1; }
+    .goal-hero-card.water    .goal-big { color:#0288d1; }
+    .goal-hero-card.exercise .goal-big { color:var(--purple); }
+    .goal-sub  { font-size:.85rem; font-weight:700; opacity:.7; }
+    .badge-done {
+      display:inline-flex; align-items:center; gap:.4rem;
+      background:#e8f5e9; color:#388e3c;
+      padding:.2rem .75rem; border-radius:999px;
+      font-size:.78rem; font-weight:800;
+    }
+    .badge-pend {
+      display:inline-flex; align-items:center; gap:.4rem;
+      background:#fff3e0; color:#f57c00;
+      padding:.2rem .75rem; border-radius:999px;
+      font-size:.78rem; font-weight:800;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Vital<span>Flow</span></div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-text">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</a>
+      <a class="nav-item active" href="meta-hoje.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg>Meta de hoje</a>
+      <a class="nav-item" href="meta-semanal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Meta semanal</a>
+      <div class="nav-section-label">Registrar</div>
+      <a class="nav-item" href="agua.html"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>Adicionar água</a>
+      <a class="nav-item" href="treino.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>Adicionar treino</a>
+      <div class="nav-section-label">Configurar</div>
+      <a class="nav-item" href="definir-meta.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>Definir metas</a>
+      <a class="nav-item" href="habitos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Análise de hábitos</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair da conta</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Meta de Hoje</span>
+      <div class="topbar-right">
+        <span id="topDate" style="font-size:.85rem;color:var(--gray-400);font-weight:700;">—</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <!-- hero cards -->
+      <div class="goal-hero-row">
+        <div class="goal-hero-card water">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h3>💧 Hidratação</h3>
+            <span id="waterBadge" class="badge-pend">Em andamento</span>
+          </div>
+          <div>
+            <div class="goal-big" id="wBig">0</div>
+            <div class="goal-sub">de <span id="wGoal">2000</span> ml</div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-header" style="font-size:.8rem;">
+              <span>Progresso</span>
+              <span class="progress-value" id="wPct">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-water" id="wBar" style="width:0%"></div></div>
+          </div>
+          <a href="agua.html" class="btn btn-ghost btn-sm" style="align-self:flex-start;">+ Adicionar água</a>
+        </div>
+
+        <div class="goal-hero-card exercise">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h3>🏋️ Atividade</h3>
+            <span id="exBadge" class="badge-pend">Em andamento</span>
+          </div>
+          <div>
+            <div class="goal-big" id="eBig">0</div>
+            <div class="goal-sub">de <span id="eGoal">30</span> min</div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-header" style="font-size:.8rem;">
+              <span>Progresso</span>
+              <span class="progress-value" id="ePct">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-exercise" id="eBar" style="width:0%"></div></div>
+          </div>
+          <a href="treino.html" class="btn btn-ghost btn-sm" style="align-self:flex-start;">+ Adicionar treino</a>
+        </div>
+      </div>
+
+      <!-- full log -->
+      <div class="two-col">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+            <div class="section-label" style="margin:0;">Água — registros de hoje</div>
+            <span id="wCount" class="chip chip-green">0 registros</span>
+          </div>
+          <div class="history-list" id="waterList"></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+            <div class="section-label" style="margin:0;">Treino — registros de hoje</div>
+            <span id="eCount" class="chip chip-purple">0 registros</span>
+          </div>
+          <div class="history-list" id="exList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+  VF.requireAuth();
+  VF.initSidebar('meta-hoje.html');
+  document.getElementById('topDate').textContent = VF.dateLabel();
+
+  function render() {
+    const goals  = VF.getGoals();
+    const wTotal = VF.dayTotal('water');
+    const eTotal = VF.dayTotal('exercise');
+    const wPct   = VF.pct('water');
+    const ePct   = VF.pct('exercise');
+
+    document.getElementById('wBig').textContent  = wTotal;
+    document.getElementById('wGoal').textContent = goals.water;
+    document.getElementById('wPct').textContent  = wPct + '%';
+    document.getElementById('wBar').style.width  = wPct + '%';
+    document.getElementById('waterBadge').className = wPct >= 100 ? 'badge-done' : 'badge-pend';
+    document.getElementById('waterBadge').textContent = wPct >= 100 ? '✓ Concluída' : 'Em andamento';
+
+    document.getElementById('eBig').textContent  = eTotal;
+    document.getElementById('eGoal').textContent = goals.exercise;
+    document.getElementById('ePct').textContent  = ePct + '%';
+    document.getElementById('eBar').style.width  = ePct + '%';
+    document.getElementById('exBadge').className = ePct >= 100 ? 'badge-done' : 'badge-pend';
+    document.getElementById('exBadge').textContent = ePct >= 100 ? '✓ Concluída' : 'Em andamento';
+
+    const log    = VF.getLog();
+    const wLog   = log.filter(e => e.type === 'water').reverse();
+    const eLog   = log.filter(e => e.type === 'exercise').reverse();
+
+    document.getElementById('wCount').textContent = wLog.length + ' registro' + (wLog.length !== 1 ? 's' : '');
+    document.getElementById('eCount').textContent = eLog.length + ' registro' + (eLog.length !== 1 ? 's' : '');
+
+    const wList = document.getElementById('waterList');
+    const eList = document.getElementById('exList');
+
+    wList.innerHTML = wLog.length
+      ? wLog.map(e => `<div class="history-item"><div class="hi-left"><div class="hi-badge water"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg></div>${e.amount} ml</div><span class="hi-time">${new Date(e.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`).join('')
+      : `<div class="history-empty"><p>Nenhum registro de água hoje.</p></div>`;
+
+    eList.innerHTML = eLog.length
+      ? eLog.map(e => `<div class="history-item"><div class="hi-left"><div class="hi-badge exercise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/></svg></div>${e.label || 'Atividade'} — ${e.amount} min</div><span class="hi-time">${new Date(e.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`).join('')
+      : `<div class="history-empty"><p>Nenhum treino registrado hoje.</p></div>`;
+  }
+
+  render();
+</script>
+</body>
+</html>

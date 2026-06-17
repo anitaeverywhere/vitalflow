@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VitalFlow — Adicionar Treino</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .ex-hero {
+      background: linear-gradient(135deg,var(--purple-light) 0%,#d1c4e9 100%);
+      border-radius: var(--r-xl);
+      padding: 2rem 2.5rem;
+      display: flex; align-items: center; gap: 2rem;
+      margin-bottom: 1.75rem;
+      border: 1.5px solid #d1c4e9;
+    }
+    .ex-hero-icon {
+      width: 80px; height: 80px;
+      background: rgba(124,77,190,.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ex-hero-icon svg { width: 42px; height: 42px; color: var(--purple); }
+    .ex-hero h2 { color: var(--purple-dark); }
+    .ex-hero p  { color: var(--purple); font-size: .9rem; }
+
+    .big-amount { text-align:center; padding:1.5rem 0 1rem; }
+    .big-amount .val { font-size:4rem; font-weight:900; color:var(--purple); line-height:1; }
+    .big-amount .unit { font-size:1.2rem; color:var(--gray-400); font-weight:700; }
+
+    .activity-types {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: .6rem;
+      margin-bottom: 1rem;
+    }
+    .activity-type-btn {
+      padding: .6rem .5rem;
+      border-radius: var(--r-md);
+      border: 2px solid var(--gray-200);
+      background: var(--card-bg);
+      font-size: .82rem; font-weight: 800;
+      color: var(--gray-600);
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: .3rem;
+      transition: border-color var(--ease), background var(--ease), color var(--ease);
+    }
+    .activity-type-btn svg { width: 20px; height: 20px; }
+    .activity-type-btn:hover,
+    .activity-type-btn.sel { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
+    .custom-row { display:flex; gap:.75rem; align-items:flex-end; }
+    .custom-row .form-group { flex:1; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Vital<span>Flow</span></div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-text">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</a>
+      <a class="nav-item" href="meta-hoje.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg>Meta de hoje</a>
+      <a class="nav-item" href="meta-semanal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Meta semanal</a>
+      <div class="nav-section-label">Registrar</div>
+      <a class="nav-item" href="agua.html"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>Adicionar água</a>
+      <a class="nav-item active" href="treino.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>Adicionar treino</a>
+      <div class="nav-section-label">Configurar</div>
+      <a class="nav-item" href="definir-meta.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>Definir metas</a>
+      <a class="nav-item" href="habitos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Análise de hábitos</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair da conta</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Adicionar Treino</span>
+      <div class="topbar-right">
+        <a href="dashboard.html" class="btn btn-ghost btn-sm">← Voltar</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="ex-hero">
+        <div class="ex-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>
+        </div>
+        <div>
+          <h2>Atividade física</h2>
+          <p>Cada minuto de movimento conta para sua saúde!</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="card">
+            <div class="section-label">Progresso de hoje</div>
+            <div class="big-amount">
+              <div class="val" id="totalEx">0</div>
+              <div class="unit">/ <span id="goalEx">30</span> min</div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span>Atividade física</span>
+                <span class="progress-value" id="pctEx">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill fill-exercise" id="exBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Tipo de atividade</div>
+            <div class="activity-types" id="activityTypes">
+              <button class="activity-type-btn sel" data-type="Caminhada">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M9.5 8.5 8 14l2 4"/><path d="M14 8.5l2 5-2 4"/><path d="M8 14l4 1 4-1"/></svg>
+                Caminhada
+              </button>
+              <button class="activity-type-btn" data-type="Corrida">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13" cy="4" r="2"/><path d="M7 21l2-8 3 2 2-4 3 4-1 6"/><path d="M5 11l2-4 4 2"/></svg>
+                Corrida
+              </button>
+              <button class="activity-type-btn" data-type="Musculação">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="10" width="4" height="4" rx="1"/><rect x="18" y="10" width="4" height="4" rx="1"/><line x1="6" y1="12" x2="18" y2="12" stroke-width="3"/></svg>
+                Musculação
+              </button>
+              <button class="activity-type-btn" data-type="Ciclismo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M12 5v4l3 3-3 0-3-3V5"/><circle cx="12" cy="4" r="1"/></svg>
+                Ciclismo
+              </button>
+              <button class="activity-type-btn" data-type="Yoga">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="4" r="2"/><path d="M8 12c0-3 2-5 4-5s4 2 4 5"/><path d="M5 20c2-3 4-5 7-5s5 2 7 5"/></svg>
+                Yoga
+              </button>
+              <button class="activity-type-btn" data-type="Outro">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Outro
+              </button>
+            </div>
+
+            <div class="section-label">Duração</div>
+            <div class="preset-grid preset-grid-4" style="margin-bottom:1rem;">
+              <button class="preset-btn" onclick="addEx(15)">15 min</button>
+              <button class="preset-btn" onclick="addEx(20)">20 min</button>
+              <button class="preset-btn" onclick="addEx(30)">30 min</button>
+              <button class="preset-btn" onclick="addEx(45)">45 min</button>
+              <button class="preset-btn" onclick="addEx(60)">60 min</button>
+              <button class="preset-btn" onclick="addEx(90)">90 min</button>
+              <button class="preset-btn" onclick="addEx(120)">2 horas</button>
+              <button class="preset-btn" onclick="addEx(180)">3 horas</button>
+            </div>
+            <div class="divider" style="margin-bottom:1rem;"></div>
+            <div class="section-label">Duração personalizada</div>
+            <div class="custom-row">
+              <div class="form-group">
+                <label for="customMin">Minutos</label>
+                <input id="customMin" type="number" class="input" min="1" max="600" placeholder="ex: 40"/>
+              </div>
+              <button class="btn btn-primary" style="height:46px;" onclick="addCustomEx()">Registrar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: history -->
+        <div class="card" style="align-self:start;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+            <div class="section-label" style="margin:0;">Histórico de hoje</div>
+            <button class="btn btn-ghost btn-sm" onclick="clearEx()">Limpar</button>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+  VF.requireAuth();
+  VF.initSidebar('treino.html');
+
+  let selectedType = 'Caminhada';
+  document.getElementById('activityTypes').addEventListener('click', e => {
+    const btn = e.target.closest('.activity-type-btn');
+    if (!btn) return;
+    document.querySelectorAll('.activity-type-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    selectedType = btn.dataset.type;
+  });
+
+  function render() {
+    const goals = VF.getGoals();
+    const total = VF.dayTotal('exercise');
+    const pct   = VF.pct('exercise');
+    document.getElementById('totalEx').textContent = total;
+    document.getElementById('goalEx').textContent  = goals.exercise;
+    document.getElementById('pctEx').textContent   = pct + '%';
+    document.getElementById('exBar').style.width   = pct + '%';
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const log  = VF.getLog().filter(e => e.type === 'exercise').reverse();
+    const list = document.getElementById('historyList');
+    if (!log.length) {
+      list.innerHTML = `<div class="history-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:48px;height:48px;opacity:.2;"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg><p>Nenhum treino registrado hoje.</p></div>`;
+      return;
+    }
+    list.innerHTML = log.map(e => {
+      const t = new Date(e.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="history-item">
+        <div class="hi-left">
+          <div class="hi-badge exercise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/></svg></div>
+          <span>${e.label || 'Atividade'} — ${e.amount} min</span>
+        </div>
+        <span class="hi-time">${t}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function addEx(min) {
+    const log = VF.getLog();
+    log.push({ type: 'exercise', amount: min, label: selectedType, ts: Date.now() });
+    VF.saveLog(log);
+    render();
+    const total = VF.dayTotal('exercise');
+    const goal  = VF.getGoals().exercise;
+    VF.toast(total >= goal ? '🏆 Meta de treino atingida!' : `🏋️ ${selectedType} — ${min} min registrados`, total >= goal ? 'success' : '');
+  }
+
+  function addCustomEx() {
+    const v = parseInt(document.getElementById('customMin').value, 10);
+    if (!v || v < 1) { VF.toast('Insira um valor válido.', 'error'); return; }
+    document.getElementById('customMin').value = '';
+    addEx(v);
+  }
+
+  document.getElementById('customMin').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomEx(); });
+
+  function clearEx() {
+    if (!confirm('Remover todos os treinos de hoje?')) return;
+    const log = VF.getLog().filter(e => e.type !== 'exercise');
+    VF.saveLog(log);
+    render();
+    VF.toast('Treinos removidos.');
+  }
+
+  render();
+</script>
+</body>
+</html>

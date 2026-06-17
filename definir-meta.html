@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VitalFlow — Definir Metas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .goal-section-card {
+      background: var(--white);
+      border-radius: var(--r-xl);
+      border: 1.5px solid var(--gray-100);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+    .goal-section-header {
+      padding: 1.25rem 1.75rem;
+      display: flex; align-items: center; gap: 1rem;
+      border-bottom: 1.5px solid var(--gray-100);
+    }
+    .goal-section-header .gs-icon {
+      width: 46px; height: 46px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .goal-section-header .gs-icon svg { width: 24px; height: 24px; }
+    .goal-section-body { padding: 1.5rem 1.75rem; display:flex; flex-direction:column; gap:1.25rem; }
+
+    .goal-input-row {
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .goal-input-row .input { max-width: 130px; text-align:center; font-size:1.2rem; font-weight:900; }
+    .goal-input-row .unit  { font-size:.9rem; font-weight:700; color:var(--gray-400); }
+    .slider-wrap { flex: 1; min-width: 180px; }
+
+    .preset-pills { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .pill {
+      padding:.3rem .9rem; border-radius:999px;
+      background:var(--gray-100); border:2px solid var(--gray-200);
+      font-size:.82rem; font-weight:800; color:var(--gray-600);
+      cursor:pointer; transition:background var(--ease),border-color var(--ease),color var(--ease);
+    }
+    .pill:hover        { background:var(--purple-light); border-color:var(--purple); color:var(--purple); }
+    .pill.water:hover  { background:#e1f5fe; border-color:#0288d1; color:#0288d1; }
+    .pill.active       { background:var(--purple); border-color:var(--purple); color:#fff; }
+    .pill.water.active { background:#0288d1; border-color:#0288d1; color:#fff; }
+
+    .save-confirm {
+      display:none; align-items:center; gap:.5rem;
+      font-size:.88rem; font-weight:800; color:var(--success);
+    }
+    .save-confirm.show { display:flex; }
+    .save-confirm svg { width:18px; height:18px; }
+
+    .danger-card {
+      background:var(--white);
+      border:1.5px solid rgba(229,57,53,.2);
+      border-radius:var(--r-xl);
+      padding:1.5rem 1.75rem;
+      display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+    }
+    .danger-card h3 { color:var(--danger); }
+    .danger-card p  { max-width:420px; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Vital<span>Flow</span></div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-text">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</a>
+      <a class="nav-item" href="meta-hoje.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg>Meta de hoje</a>
+      <a class="nav-item" href="meta-semanal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Meta semanal</a>
+      <div class="nav-section-label">Registrar</div>
+      <a class="nav-item" href="agua.html"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>Adicionar água</a>
+      <a class="nav-item" href="treino.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>Adicionar treino</a>
+      <div class="nav-section-label">Configurar</div>
+      <a class="nav-item active" href="definir-meta.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>Definir metas</a>
+      <a class="nav-item" href="habitos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Análise de hábitos</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair da conta</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Definir Metas</span>
+    </header>
+
+    <div class="page-body" style="max-width:760px;">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Suas metas diárias</h1>
+          <p>Configure quanto quer beber e se exercitar por dia. As metas entram em vigor imediatamente.</p>
+        </div>
+      </div>
+
+      <!-- Water goal -->
+      <div class="goal-section-card">
+        <div class="goal-section-header">
+          <div class="gs-icon" style="background:#e1f5fe;color:#0288d1;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>
+          </div>
+          <div>
+            <h3>Meta de Hidratação</h3>
+            <p style="font-size:.82rem;margin:0;">Consumo diário de água em mililitros</p>
+          </div>
+        </div>
+        <div class="goal-section-body">
+          <div class="goal-input-row">
+            <div class="form-group" style="flex-shrink:0;">
+              <label for="wInput">Quantidade</label>
+              <input id="wInput" type="number" class="input" min="500" max="8000" step="100"/>
+            </div>
+            <span class="unit">ml / dia</span>
+            <div class="slider-wrap">
+              <input id="wSlider" type="range" class="slider" min="500" max="5000" step="100" style="accent-color:#0288d1;"/>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Sugestões</div>
+            <div class="preset-pills" id="wPills">
+              <button class="pill water" data-v="1500">1.5 L</button>
+              <button class="pill water" data-v="2000">2 L</button>
+              <button class="pill water" data-v="2500">2.5 L</button>
+              <button class="pill water" data-v="3000">3 L</button>
+              <button class="pill water" data-v="3500">3.5 L</button>
+              <button class="pill water" data-v="4000">4 L</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exercise goal -->
+      <div class="goal-section-card">
+        <div class="goal-section-header">
+          <div class="gs-icon" style="background:var(--purple-light);color:var(--purple);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>
+          </div>
+          <div>
+            <h3>Meta de Atividade Física</h3>
+            <p style="font-size:.82rem;margin:0;">Minutos de exercício por dia</p>
+          </div>
+        </div>
+        <div class="goal-section-body">
+          <div class="goal-input-row">
+            <div class="form-group" style="flex-shrink:0;">
+              <label for="eInput">Duração</label>
+              <input id="eInput" type="number" class="input" min="5" max="300" step="5"/>
+            </div>
+            <span class="unit">min / dia</span>
+            <div class="slider-wrap">
+              <input id="eSlider" type="range" class="slider" min="5" max="180" step="5"/>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Sugestões</div>
+            <div class="preset-pills" id="ePills">
+              <button class="pill" data-v="20">20 min</button>
+              <button class="pill" data-v="30">30 min</button>
+              <button class="pill" data-v="45">45 min</button>
+              <button class="pill" data-v="60">60 min</button>
+              <button class="pill" data-v="90">90 min</button>
+              <button class="pill" data-v="120">2 horas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;">
+        <button class="btn btn-primary btn-lg" id="saveBtn">Salvar metas</button>
+        <div class="save-confirm" id="saveConfirm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Metas salvas com sucesso!
+        </div>
+      </div>
+
+      <!-- Danger -->
+      <div class="danger-card">
+        <div>
+          <h3>Apagar todos os dados</h3>
+          <p>Remove histórico, metas e conta. Ação irreversível.</p>
+        </div>
+        <button class="btn btn-danger" id="resetBtn">Apagar tudo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- confirm modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 style="color:var(--danger);">Confirmar exclusão</h3>
+      <button class="modal-close" id="closeReset">×</button>
+    </div>
+    <p>Todos os seus dados serão permanentemente removidos. Essa ação não pode ser desfeita.</p>
+    <div style="display:flex;gap:.75rem;">
+      <button class="btn btn-ghost" style="flex:1;" id="cancelReset">Cancelar</button>
+      <button class="btn btn-danger" style="flex:1;" id="confirmReset">Apagar tudo</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+  VF.requireAuth();
+  VF.initSidebar('definir-meta.html');
+
+  const goals = VF.getGoals();
+
+  /* sync slider ↔ input ↔ pills */
+  function setup(inputId, sliderId, pillsId, type) {
+    const inp = document.getElementById(inputId);
+    const sl  = document.getElementById(sliderId);
+    inp.value = sl.value = goals[type];
+
+    function syncPills(v) {
+      document.querySelectorAll(`#${pillsId} .pill`).forEach(p => {
+        p.classList.toggle('active', +p.dataset.v === +v);
+      });
+    }
+    syncPills(goals[type]);
+
+    inp.addEventListener('input', () => { sl.value = inp.value; syncPills(inp.value); });
+    sl.addEventListener('input',  () => { inp.value = sl.value; syncPills(sl.value); });
+    document.getElementById(pillsId).addEventListener('click', e => {
+      const btn = e.target.closest('.pill');
+      if (!btn) return;
+      inp.value = sl.value = btn.dataset.v;
+      syncPills(btn.dataset.v);
+    });
+  }
+
+  setup('wInput','wSlider','wPills','water');
+  setup('eInput','eSlider','ePills','exercise');
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const w = parseInt(document.getElementById('wInput').value, 10);
+    const e = parseInt(document.getElementById('eInput').value, 10);
+    if (!w || w < 500 || w > 8000) { VF.toast('Meta de água inválida (500–8000 ml).','error'); return; }
+    if (!e || e < 5  || e > 300)   { VF.toast('Meta de exercício inválida (5–300 min).','error'); return; }
+    VF.saveGoals({ water: w, exercise: e });
+    const cf = document.getElementById('saveConfirm');
+    cf.classList.add('show');
+    setTimeout(() => cf.classList.remove('show'), 2500);
+    VF.toast('Metas atualizadas!','success');
+  });
+
+  const resetModal = document.getElementById('resetModal');
+  document.getElementById('resetBtn').addEventListener('click',   () => resetModal.classList.add('open'));
+  document.getElementById('closeReset').addEventListener('click', () => resetModal.classList.remove('open'));
+  document.getElementById('cancelReset').addEventListener('click',() => resetModal.classList.remove('open'));
+  document.getElementById('confirmReset').addEventListener('click', () => {
+    Object.keys(localStorage).filter(k => k.startsWith('vf_')).forEach(k => localStorage.removeItem(k));
+    window.location.href = 'index.html';
+  });
+</script>
+</body>
+</html>

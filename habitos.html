@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VitalFlow — Análise de Hábitos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    /* streak calendar */
+    .streak-grid {
+      display: grid;
+      grid-template-columns: repeat(7,1fr);
+      gap: 5px;
+    }
+    .streak-day {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      display: flex; align-items:center; justify-content:center;
+      font-size: .7rem; font-weight:800;
+    }
+    .streak-day.both  { background:var(--purple); color:#fff; }
+    .streak-day.water { background:#0288d1; color:#fff; }
+    .streak-day.ex    { background:var(--mint-dark); color:var(--gray-900); }
+    .streak-day.none  { background:var(--gray-100); color:var(--gray-400); }
+    .streak-legend {
+      display:flex; gap:1rem; margin-bottom:.75rem; flex-wrap:wrap;
+    }
+    .sl-item {
+      display:flex; align-items:center; gap:.4rem;
+      font-size:.78rem; font-weight:700; color:var(--gray-600);
+    }
+    .sl-dot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+
+    /* insight card */
+    .insight-card {
+      background:var(--card-bg);
+      border:1.5px solid var(--mint);
+      border-radius:var(--r-lg);
+      padding:1.1rem 1.25rem;
+      display:flex; align-items:flex-start; gap:.85rem;
+    }
+    .insight-card .ic-emoji { font-size:1.5rem; flex-shrink:0; line-height:1; margin-top:.1rem; }
+    .insight-card .ic-text h4 { font-size:.9rem; color:var(--gray-900); margin-bottom:.15rem; }
+    .insight-card .ic-text p  { font-size:.82rem; margin:0; }
+
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+      gap: .75rem;
+    }
+    .achievement {
+      background:var(--white);
+      border:1.5px solid var(--gray-100);
+      border-radius:var(--r-md);
+      padding:1rem;
+      display:flex; align-items:center; gap:.85rem;
+    }
+    .achievement.unlocked { border-color:var(--mint-dark); background:var(--card-bg); }
+    .achievement .ach-icon { font-size:1.6rem; flex-shrink:0; }
+    .achievement .ach-name { font-size:.85rem; font-weight:800; color:var(--gray-900); }
+    .achievement .ach-desc { font-size:.75rem; color:var(--gray-400); }
+    .achievement.locked .ach-icon,
+    .achievement.locked .ach-name { opacity:.35; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Vital<span>Flow</span></div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-text">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</a>
+      <a class="nav-item" href="meta-hoje.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg>Meta de hoje</a>
+      <a class="nav-item" href="meta-semanal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Meta semanal</a>
+      <div class="nav-section-label">Registrar</div>
+      <a class="nav-item" href="agua.html"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>Adicionar água</a>
+      <a class="nav-item" href="treino.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>Adicionar treino</a>
+      <div class="nav-section-label">Configurar</div>
+      <a class="nav-item" href="definir-meta.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>Definir metas</a>
+      <a class="nav-item active" href="habitos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Análise de hábitos</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair da conta</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Análise de Hábitos</span>
+    </header>
+
+    <div class="page-body">
+      <!-- summary stats row -->
+      <div class="stat-row" style="margin-bottom:1.75rem;" id="statRow"></div>
+
+      <div class="two-col" style="margin-bottom:1.75rem;">
+        <!-- Calendar / streak -->
+        <div class="card">
+          <div class="section-label">Consistência — últimos 28 dias</div>
+          <div class="streak-legend">
+            <div class="sl-item"><div class="sl-dot" style="background:var(--purple);"></div>Água + Treino</div>
+            <div class="sl-item"><div class="sl-dot" style="background:#0288d1;"></div>Só água</div>
+            <div class="sl-item"><div class="sl-dot" style="background:var(--mint-dark);"></div>Só treino</div>
+            <div class="sl-item"><div class="sl-dot" style="background:var(--gray-100);"></div>Sem registro</div>
+          </div>
+          <div class="streak-grid" id="streakGrid"></div>
+        </div>
+
+        <!-- Insights -->
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div class="section-label" style="margin-bottom:0;">Insights</div>
+          <div id="insightsList"></div>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="card">
+        <div class="section-label" style="margin-bottom:.75rem;">Conquistas</div>
+        <div class="achievement-grid" id="achievementGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+  VF.requireAuth();
+  VF.initSidebar('habitos.html');
+
+  const goals = VF.getGoals();
+
+  /* build 28-day history */
+  function buildHistory(days) {
+    const result = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = `vf_log_${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const log = VF.getLog(key);
+      const w   = log.filter(e => e.type === 'water').reduce((s,e) => s + e.amount, 0);
+      const ex  = log.filter(e => e.type === 'exercise').reduce((s,e) => s + e.amount, 0);
+      result.push({ w, ex, label: d.getDate() });
+    }
+    return result;
+  }
+
+  const hist28 = buildHistory(28);
+  const hist7  = hist28.slice(-7);
+
+  /* stats */
+  const totalW7  = hist7.reduce((s,d) => s + d.w, 0);
+  const totalE7  = hist7.reduce((s,d) => s + d.ex, 0);
+  const daysW7   = hist7.filter(d => d.w  >= goals.water).length;
+  const daysE7   = hist7.filter(d => d.ex >= goals.exercise).length;
+  const streak   = (() => {
+    let s = 0;
+    for (let i = hist28.length - 1; i >= 0; i--) {
+      if (hist28[i].w >= goals.water || hist28[i].ex >= goals.exercise) s++;
+      else break;
+    }
+    return s;
+  })();
+
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat-box"><span class="stat-label">Água (7 dias)</span><span class="stat-val">${(totalW7/1000).toFixed(1)}</span><span class="stat-unit">litros</span></div>
+    <div class="stat-box"><span class="stat-label">Treino (7 dias)</span><span class="stat-val">${totalE7}</span><span class="stat-unit">minutos</span></div>
+    <div class="stat-box"><span class="stat-label">Meta água (7d)</span><span class="stat-val">${daysW7}/7</span><span class="stat-unit">dias</span></div>
+    <div class="stat-box"><span class="stat-label">Meta treino (7d)</span><span class="stat-val">${daysE7}/7</span><span class="stat-unit">dias</span></div>
+    <div class="stat-box"><span class="stat-label">Sequência atual</span><span class="stat-val">${streak}</span><span class="stat-unit">dias</span></div>
+  `;
+
+  /* streak grid */
+  document.getElementById('streakGrid').innerHTML = hist28.map(d => {
+    const hasW  = d.w  >= goals.water;
+    const hasE  = d.ex >= goals.exercise;
+    const cls   = hasW && hasE ? 'both' : hasW ? 'water' : hasE ? 'ex' : 'none';
+    return `<div class="streak-day ${cls}" title="${d.label}">${d.label}</div>`;
+  }).join('');
+
+  /* insights */
+  const insights = [];
+  if (daysW7 === 7)  insights.push({ e:'🏆', t:'Perfeito na hidratação!', d:'Você atingiu a meta de água todos os 7 dias da semana.' });
+  else if (daysW7 >= 5) insights.push({ e:'💧', t:'Quase lá na hidratação', d:`Meta de água atingida em ${daysW7}/7 dias. Continue assim!` });
+  else                   insights.push({ e:'💡', t:'Beba mais água', d:'Tente registrar pelo menos 250 ml a cada 2 horas.' });
+  if (daysE7 === 7)  insights.push({ e:'🔥', t:'Treino impecável!', d:'7 dias seguidos de atividade física. Incrível!' });
+  else if (daysE7 >= 4) insights.push({ e:'🏋️', t:'Bom ritmo de treino', d:`${daysE7} dias de exercício esta semana. Mantenha!` });
+  else                   insights.push({ e:'⚡', t:'Mova-se mais', d:'Experimente treinos curtos de 15 min para criar o hábito.' });
+  if (streak >= 3)   insights.push({ e:'🌟', t:`Sequência de ${streak} dias`, d:'Você está em sequência! Não quebre o ritmo.' });
+  const il = document.getElementById('insightsList');
+  il.style.cssText = 'display:flex;flex-direction:column;gap:.6rem;';
+  il.innerHTML = insights.map(i => `
+    <div class="insight-card">
+      <span class="ic-emoji">${i.e}</span>
+      <div class="ic-text"><h4>${i.t}</h4><p>${i.d}</p></div>
+    </div>`).join('');
+
+  /* achievements */
+  const ach = [
+    { e:'💧', n:'Primeiro gole',    d:'Registrou água pela 1ª vez',    unlock: hist28.some(d => d.w > 0) },
+    { e:'🏋️', n:'Primeiro treino',  d:'Registrou um treino',            unlock: hist28.some(d => d.ex > 0) },
+    { e:'⭐', n:'3 dias seguidos',   d:'Hábito por 3 dias consecutivos', unlock: streak >= 3 },
+    { e:'🔥', n:'7 dias seguidos',   d:'Uma semana de consistência',     unlock: streak >= 7 },
+    { e:'💎', n:'Mês perfeito',      d:'28 dias com pelo menos 1 hábito',unlock: hist28.filter(d => d.w > 0 || d.ex > 0).length >= 28 },
+    { e:'🌊', n:'Mar de água',       d:'2 litros num único dia',          unlock: hist28.some(d => d.w >= 2000) },
+    { e:'🏆', n:'Maratonista',       d:'60 min de treino num dia',        unlock: hist28.some(d => d.ex >= 60) },
+    { e:'🎯', n:'Meta dupla',        d:'Água e treino no mesmo dia',      unlock: hist28.some(d => d.w >= goals.water && d.ex >= goals.exercise) },
+  ];
+  document.getElementById('achievementGrid').innerHTML = ach.map(a => `
+    <div class="achievement ${a.unlock ? 'unlocked' : 'locked'}">
+      <div class="ach-icon">${a.e}</div>
+      <div><div class="ach-name">${a.n}</div><div class="ach-desc">${a.d}</div></div>
+    </div>`).join('');
+</script>
+</body>
+</html>

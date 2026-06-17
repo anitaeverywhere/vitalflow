@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VitalFlow — Adicionar Água</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .water-hero {
+      background: linear-gradient(135deg,#e1f5fe 0%,#b3e5fc 100%);
+      border-radius: var(--r-xl);
+      padding: 2rem 2.5rem;
+      display: flex; align-items: center; gap: 2rem;
+      margin-bottom: 1.75rem;
+      border: 1.5px solid #b3e5fc;
+    }
+    .water-hero-icon {
+      width: 80px; height: 80px;
+      background: rgba(2,136,209,.12);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .water-hero-icon svg { width: 44px; height: 44px; color: #0288d1; }
+    .water-hero h2 { color: #01579b; }
+    .water-hero p  { color: #0277bd; font-size: .9rem; }
+
+    .big-amount {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+    }
+    .big-amount .val {
+      font-size: 4rem;
+      font-weight: 900;
+      color: #0288d1;
+      line-height: 1;
+    }
+    .big-amount .unit { font-size: 1.2rem; color: var(--gray-400); font-weight: 700; }
+
+    .custom-row {
+      display: flex; gap: .75rem; align-items: flex-end;
+    }
+    .custom-row .form-group { flex: 1; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Vital<span>Flow</span></div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-text">
+        <div class="name" id="sidebarName">—</div>
+        <div class="email" id="sidebarEmail">—</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</a>
+      <a class="nav-item" href="meta-hoje.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg>Meta de hoje</a>
+      <a class="nav-item" href="meta-semanal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Meta semanal</a>
+      <div class="nav-section-label">Registrar</div>
+      <a class="nav-item active" href="agua.html"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>Adicionar água</a>
+      <a class="nav-item" href="treino.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><line x1="5" y1="17" x2="19" y2="17"/></svg>Adicionar treino</a>
+      <div class="nav-section-label">Configurar</div>
+      <a class="nav-item" href="definir-meta.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>Definir metas</a>
+      <a class="nav-item" href="habitos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Análise de hábitos</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair da conta</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Adicionar Água</span>
+      <div class="topbar-right">
+        <a href="dashboard.html" class="btn btn-ghost btn-sm">← Voltar</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <!-- hero -->
+      <div class="water-hero">
+        <div class="water-hero-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>
+        </div>
+        <div>
+          <h2>Hidratação diária</h2>
+          <p>Registre cada gole. A constância faz toda a diferença!</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT: add -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <!-- progress card -->
+          <div class="card">
+            <div class="section-label">Progresso de hoje</div>
+            <div class="big-amount">
+              <div class="val" id="totalWater">0</div>
+              <div class="unit">/ <span id="goalWater">2000</span> ml</div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span>Hidratação</span>
+                <span class="progress-value" id="pctWater">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill fill-water" id="waterBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- quick presets -->
+          <div class="card">
+            <div class="section-label">Adicionar rapidamente</div>
+            <div class="preset-grid preset-grid-4" style="margin-bottom:1.25rem;">
+              <button class="preset-btn" onclick="addWater(150)">150 ml<br><small style="font-weight:600;color:var(--gray-400);">copo peq.</small></button>
+              <button class="preset-btn" onclick="addWater(200)">200 ml<br><small style="font-weight:600;color:var(--gray-400);">copo méd.</small></button>
+              <button class="preset-btn" onclick="addWater(300)">300 ml<br><small style="font-weight:600;color:var(--gray-400);">copo gde.</small></button>
+              <button class="preset-btn" onclick="addWater(350)">350 ml<br><small style="font-weight:600;color:var(--gray-400);">garrafa p.</small></button>
+              <button class="preset-btn" onclick="addWater(500)">500 ml<br><small style="font-weight:600;color:var(--gray-400);">garrafa m.</small></button>
+              <button class="preset-btn" onclick="addWater(600)">600 ml<br><small style="font-weight:600;color:var(--gray-400);">garrafa g.</small></button>
+              <button class="preset-btn" onclick="addWater(1000)">1000 ml<br><small style="font-weight:600;color:var(--gray-400);">1 litro</small></button>
+              <button class="preset-btn" onclick="addWater(1500)">1500 ml<br><small style="font-weight:600;color:var(--gray-400);">1,5 litros</small></button>
+            </div>
+            <div class="divider" style="margin-bottom:1rem;"></div>
+            <div class="section-label">Valor personalizado</div>
+            <div class="custom-row">
+              <div class="form-group">
+                <label for="customMl">Quantidade (ml)</label>
+                <input id="customMl" type="number" class="input" min="1" max="5000" placeholder="ex: 350"/>
+              </div>
+              <button class="btn btn-primary" style="height:46px;" onclick="addCustomWater()">Registrar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: history -->
+        <div class="card" style="align-self:start;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+            <div class="section-label" style="margin:0;">Histórico de hoje</div>
+            <button class="btn btn-ghost btn-sm" onclick="clearWater()">Limpar</button>
+          </div>
+          <div class="history-list" id="historyList">
+            <div class="history-empty">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg>
+              <p>Nenhum registro ainda.<br>Adicione sua primeira água!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+  VF.requireAuth();
+  VF.initSidebar('agua.html');
+
+  function render() {
+    const goals  = VF.getGoals();
+    const total  = VF.dayTotal('water');
+    const pct    = VF.pct('water');
+    document.getElementById('totalWater').textContent = total;
+    document.getElementById('goalWater').textContent  = goals.water;
+    document.getElementById('pctWater').textContent   = pct + '%';
+    document.getElementById('waterBar').style.width   = pct + '%';
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const log  = VF.getLog().filter(e => e.type === 'water').reverse();
+    const list = document.getElementById('historyList');
+    if (!log.length) {
+      list.innerHTML = `<div class="history-empty"><svg viewBox="0 0 24 24" fill="currentColor" style="width:48px;height:48px;opacity:.2;"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg><p>Nenhum registro ainda.<br>Adicione sua primeira água!</p></div>`;
+      return;
+    }
+    list.innerHTML = log.map(e => {
+      const t = new Date(e.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="history-item">
+        <div class="hi-left">
+          <div class="hi-badge water"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 8 2 13a10 10 0 0 0 20 0C22 8 17.52 2 12 2z"/></svg></div>
+          ${e.amount} ml
+        </div>
+        <span class="hi-time">${t}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function addWater(ml) {
+    VF.addEntry('water', ml);
+    render();
+    const total = VF.dayTotal('water');
+    const goal  = VF.getGoals().water;
+    VF.toast(total >= goal ? '🎉 Meta de hidratação atingida!' : `💧 +${ml} ml adicionados`, total >= goal ? 'success' : '');
+  }
+
+  function addCustomWater() {
+    const v = parseInt(document.getElementById('customMl').value, 10);
+    if (!v || v < 1) { VF.toast('Insira um valor válido.', 'error'); return; }
+    document.getElementById('customMl').value = '';
+    addWater(v);
+  }
+
+  document.getElementById('customMl').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomWater(); });
+
+  function clearWater() {
+    if (!confirm('Remover todos os registros de água de hoje?')) return;
+    const log = VF.getLog().filter(e => e.type !== 'water');
+    VF.saveLog(log);
+    render();
+    VF.toast('Registros de água removidos.');
+  }
+
+  render();
+</script>
+</body>
+</html>
