@@ -89,6 +89,51 @@
 
     .form-stack { display: flex; flex-direction: column; gap: .9rem; }
 
+    .pw-wrap { position: relative; }
+    .pw-wrap .input { padding-right: 3rem; }
+    .pw-toggle {
+      position: absolute; right: .85rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--gray-400); cursor: pointer;
+      display: flex; align-items: center;
+    }
+    .pw-toggle:hover { color: var(--purple); }
+    .pw-toggle svg { width: 18px; height: 18px; }
+
+    .login-divider {
+      display: flex; align-items: center; gap: .75rem;
+      color: var(--gray-400); font-size: .8rem; font-weight: 700;
+    }
+    .login-divider::before, .login-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    }
+
+    .signup-row {
+      text-align: center;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--gray-600);
+    }
+    .signup-row a { color: var(--purple); text-decoration: none; }
+    .signup-row a:hover { text-decoration: underline; }
+
+    /* spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .spinner  { display: block; }
+
+    /* modal signup */
+    .modal-overlay { font-family: 'Nunito', sans-serif; }
+
     @media (max-width: 860px) {
       .login-left { display: none; }
       .login-right { width: 100%; padding: 2rem 1.5rem; }
@@ -133,27 +178,164 @@
 <div class="login-right">
   <div class="login-form-wrap">
     <div>
-      <h2>Bem-vindo ao VitalFlow</h2>
-      <p>Clique no botão abaixo para explorar o app com a conta de demonstração.</p>
+      <h2>Bem-vindo de volta</h2>
+      <p>Entre na sua conta para continuar</p>
     </div>
 
-    <button type="button" class="btn btn-primary btn-full btn-lg" id="demoBtn">
-      Entrar com conta demo
+    <form id="loginForm" novalidate class="form-stack">
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" class="input" placeholder="seu@email.com" autocomplete="email" required/>
+        <span class="field-error" id="emailErr">Insira um e-mail válido.</span>
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <div class="pw-wrap">
+          <input id="password" type="password" class="input" placeholder="Sua senha" autocomplete="current-password" required/>
+          <button type="button" class="pw-toggle" id="togglePw" aria-label="Mostrar senha">
+            <svg id="eyeOn"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eyeOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+        <span class="field-error" id="pwErr">Senha incorreta ou muito curta.</span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">
+        <span class="btn-text">Entrar</span>
+        <div class="spinner"></div>
+      </button>
+    </form>
+
+    <div class="login-divider">ou</div>
+
+    <button type="button" class="btn btn-green btn-full" id="demoBtn">
+      Entrar com conta de demonstração
     </button>
+
+    <p class="signup-row">Novo por aqui? <a href="#" id="signupLink">Criar conta grátis</a></p>
+  </div>
+</div>
+
+<!-- ── SIGNUP MODAL ── -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Criar nova conta</h3>
+      <button class="modal-close" id="closeSignup">×</button>
+    </div>
+    <form id="signupForm" novalidate class="form-stack">
+      <div class="form-group">
+        <label for="suName">Seu nome</label>
+        <input id="suName" type="text" class="input" placeholder="Como quer ser chamado?" required/>
+        <span class="field-error" id="suNameErr">Informe seu nome.</span>
+      </div>
+      <div class="form-group">
+        <label for="suEmail">E-mail</label>
+        <input id="suEmail" type="email" class="input" placeholder="seu@email.com" required/>
+        <span class="field-error" id="suEmailErr">E-mail inválido ou já cadastrado.</span>
+      </div>
+      <div class="form-group">
+        <label for="suPw">Senha</label>
+        <input id="suPw" type="password" class="input" placeholder="Mínimo 6 caracteres" required/>
+        <span class="field-error" id="suPwErr">Mínimo 6 caracteres.</span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Criar conta</button>
+    </form>
   </div>
 </div>
 
 <div id="toast-container"></div>
 <script src="js/app.js"></script>
 <script>
-  if (VF.getSession()) window.location.href = 'dashboard.html';
+  const DEMO = { email: 'demo@vitalflow.app', password: 'demo123', name: 'Usuário Demo' };
+
+  function err(inputId, errId, show, msg) {
+    document.getElementById(inputId).classList.toggle('error', show);
+    const el = document.getElementById(errId);
+    el.classList.toggle('show', show);
+    if (msg) el.textContent = msg;
+  }
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  document.getElementById('togglePw').addEventListener('click', () => {
+    const pw = document.getElementById('password');
+    const isText = pw.type === 'text';
+    pw.type = isText ? 'password' : 'text';
+    document.getElementById('eyeOn').style.display  = isText ? '' : 'none';
+    document.getElementById('eyeOff').style.display = isText ? 'none' : '';
+  });
+
+  function doLogin(email, pw) {
+    if (email === DEMO.email && pw === DEMO.password) {
+      localStorage.setItem('vf_session', JSON.stringify({ email: DEMO.email, name: DEMO.name }));
+      if (!localStorage.getItem('vf_goals')) VF.saveGoals({ water: 2000, exercise: 30 });
+      return true;
+    }
+    const users = JSON.parse(localStorage.getItem('vf_users') || '[]');
+    const u = users.find(u => u.email === email && u.password === pw);
+    if (u) {
+      localStorage.setItem('vf_session', JSON.stringify({ email: u.email, name: u.name }));
+      return true;
+    }
+    return false;
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const pw    = document.getElementById('password').value;
+    let ok = true;
+    if (!validEmail(email)) { err('email','emailErr',true); ok=false; } else err('email','emailErr',false);
+    if (pw.length < 6)       { err('password','pwErr',true); ok=false; } else err('password','pwErr',false);
+    if (!ok) return;
+    const btn = document.getElementById('loginBtn');
+    btn.classList.add('loading');
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      if (doLogin(email, pw)) {
+        VF.toast('Bem-vindo!', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
+      } else {
+        err('password','pwErr',true,'E-mail ou senha incorretos.');
+        VF.toast('E-mail ou senha incorretos.', 'error');
+      }
+    }, 700);
+  });
 
   document.getElementById('demoBtn').addEventListener('click', () => {
-    localStorage.setItem('vf_session', JSON.stringify({ email: 'demo@vitalflow.app', name: 'Usuário Demo' }));
+    localStorage.setItem('vf_session', JSON.stringify({ email: DEMO.email, name: DEMO.name }));
     if (!localStorage.getItem('vf_goals')) VF.saveGoals({ water: 2000, exercise: 30 });
     VF.toast('Bem-vindo!', 'success');
     setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
   });
+
+  const modal = document.getElementById('signupModal');
+  document.getElementById('signupLink').addEventListener('click', e => { e.preventDefault(); modal.classList.add('open'); });
+  document.getElementById('closeSignup').addEventListener('click', () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+  document.getElementById('signupForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name  = document.getElementById('suName').value.trim();
+    const email = document.getElementById('suEmail').value.trim();
+    const pw    = document.getElementById('suPw').value;
+    let ok = true;
+    if (!name)              { err('suName','suNameErr',true); ok=false; } else err('suName','suNameErr',false);
+    if (!validEmail(email)) { err('suEmail','suEmailErr',true,'E-mail inválido.'); ok=false; } else err('suEmail','suEmailErr',false);
+    if (pw.length < 6)      { err('suPw','suPwErr',true); ok=false; } else err('suPw','suPwErr',false);
+    if (!ok) return;
+    const users = JSON.parse(localStorage.getItem('vf_users') || '[]');
+    if (users.find(u => u.email === email)) {
+      err('suEmail','suEmailErr',true,'Este e-mail já está cadastrado.'); return;
+    }
+    users.push({ name, email, password: pw });
+    localStorage.setItem('vf_users', JSON.stringify(users));
+    localStorage.setItem('vf_session', JSON.stringify({ email, name }));
+    if (!localStorage.getItem('vf_goals')) VF.saveGoals({ water: 2000, exercise: 30 });
+    VF.toast('Conta criada!', 'success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+  });
+
+  if (VF.getSession()) window.location.href = 'dashboard.html';
 </script>
 </body>
 </html>
