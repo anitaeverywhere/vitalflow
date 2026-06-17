@@ -282,6 +282,14 @@
           <!-- reminder list -->
           <div id="reminderList" style="display:flex;flex-direction:column;gap:.5rem;"></div>
 
+          <!-- add new reminder -->
+          <div id="addReminderRow" style="display:none;">
+            <button class="btn btn-ghost btn-sm" id="addReminderBtn" style="align-self:flex-start;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Adicionar lembrete
+            </button>
+          </div>
+
           <!-- actions -->
           <div id="notifActions" style="display:none;flex-wrap:wrap;gap:.6rem;">
             <button class="btn btn-primary" id="saveNotifBtn">Salvar lembretes</button>
@@ -308,6 +316,43 @@
         </div>
         <button class="btn btn-danger" id="resetBtn">Apagar tudo</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- add reminder modal -->
+<div class="modal-overlay" id="addReminderModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Novo lembrete</h3>
+      <button class="modal-close" id="closeAddReminder">×</button>
+    </div>
+    <div class="form-stack">
+      <div class="form-group">
+        <label for="newReminderTitle">Título</label>
+        <input id="newReminderTitle" type="text" class="input" placeholder="ex: 💧 Hora de beber água!" maxlength="60"/>
+        <span class="field-error" id="newTitleErr">Informe um título.</span>
+      </div>
+      <div class="form-group">
+        <label for="newReminderBody">Mensagem</label>
+        <input id="newReminderBody" type="text" class="input" placeholder="ex: Você já bebeu água hoje?" maxlength="100"/>
+      </div>
+      <div class="two-col" style="gap:.75rem;">
+        <div class="form-group">
+          <label for="newReminderTime">Horário</label>
+          <input id="newReminderTime" type="time" class="input" value="08:00"/>
+        </div>
+        <div class="form-group">
+          <label>Destino ao clicar</label>
+          <select id="newReminderUrl" class="input" style="cursor:pointer;">
+            <option value="agua.html">Adicionar água</option>
+            <option value="treino.html">Adicionar treino</option>
+            <option value="meta-hoje.html">Meta de hoje</option>
+            <option value="dashboard.html">Início</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="confirmAddReminder">Adicionar lembrete</button>
     </div>
   </div>
 </div>
@@ -415,6 +460,8 @@
       badge.textContent = 'Desativado';
     }
 
+    document.getElementById('addReminderRow').style.display = granted ? 'flex' : 'none';
+
     const list = document.getElementById('reminderList');
     list.innerHTML = reminders.map((r, i) => `
       <div class="reminder-row ${r.enabled ? 'enabled' : ''}" id="rr-${i}">
@@ -426,6 +473,9 @@
         <div class="rr-time">
           <input type="time" value="${pad(r.hour)}:${pad(r.minute)}" data-i="${i}" ${!granted ? 'disabled' : ''}/>
         </div>
+        ${r.custom ? `<button class="btn btn-ghost btn-sm" data-del="${i}" style="padding:.3rem .5rem;color:var(--danger);border-color:rgba(229,57,53,.3);" title="Remover">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>` : ''}
       </div>
     `).join('');
 
@@ -445,6 +495,15 @@
         const [h, m] = inp.value.split(':').map(Number);
         reminders[i].hour   = h;
         reminders[i].minute = m;
+      });
+    });
+
+    /* delete custom reminders */
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = +btn.dataset.del;
+        reminders.splice(i, 1);
+        renderReminders();
       });
     });
   }
@@ -478,6 +537,52 @@
     VFNotif.clearSW();
     VF.toast('Todos os lembretes desativados.');
     renderReminders();
+  });
+
+  /* ── Add reminder modal ── */
+  const addModal = document.getElementById('addReminderModal');
+
+  document.getElementById('addReminderBtn')?.addEventListener('click', () => {
+    document.getElementById('newReminderTitle').value = '';
+    document.getElementById('newReminderBody').value  = '';
+    document.getElementById('newReminderTime').value  = '08:00';
+    document.getElementById('newTitleErr').classList.remove('show');
+    addModal.classList.add('open');
+    document.getElementById('newReminderTitle').focus();
+  });
+
+  document.getElementById('closeAddReminder')?.addEventListener('click', () => addModal.classList.remove('open'));
+  addModal?.addEventListener('click', e => { if (e.target === addModal) addModal.classList.remove('open'); });
+
+  document.getElementById('confirmAddReminder')?.addEventListener('click', () => {
+    const title = document.getElementById('newReminderTitle').value.trim();
+    const body  = document.getElementById('newReminderBody').value.trim() || 'Não esqueça do seu hábito!';
+    const time  = document.getElementById('newReminderTime').value || '08:00';
+    const url   = document.getElementById('newReminderUrl').value;
+
+    if (!title) {
+      document.getElementById('newTitleErr').classList.add('show');
+      document.getElementById('newReminderTitle').focus();
+      return;
+    }
+
+    const [hour, minute] = time.split(':').map(Number);
+    reminders.push({
+      id:      'custom-' + Date.now(),
+      enabled: true,
+      hour, minute,
+      title, body, url,
+      custom:  true,
+    });
+
+    addModal.classList.remove('open');
+    renderReminders();
+    VF.toast('Lembrete adicionado! Salve para ativar.', 'success');
+  });
+
+  /* submit on Enter */
+  document.getElementById('newReminderTitle')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('confirmAddReminder').click();
   });
 
   renderReminders();
